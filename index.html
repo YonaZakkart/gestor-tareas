@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor de Tareas por Prioridad</title>
+  <link rel="stylesheet" href="src/styles/styles.css">
+</head>
+<body>
+  <div class="contenedor">
+    <header>
+      <h1>Gestor de Tareas</h1>
+      <p>Organiza por prioridad · Persistencia local</p>
+    </header>
+
+    <!-- Formulario de alta -->
+    <section class="panel">
+      <h2>Nueva tarea</h2>
+      <form id="form-tarea" autocomplete="off">
+        <div class="campo">
+          <label for="titulo">Título</label>
+          <input
+            type="text"
+            id="titulo"
+            name="titulo"
+            placeholder="¿Qué hay que hacer?"
+            maxlength="120"
+            required
+          >
+        </div>
+        <div class="campo">
+          <label for="prioridad">Prioridad</label>
+          <select id="prioridad" name="prioridad" required>
+            <option value="alta">Alta</option>
+            <option value="media" selected>Media</option>
+            <option value="baja">Baja</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primario">Agregar</button>
+      </form>
+      <p id="mensaje-error" hidden role="alert"></p>
+    </section>
+
+    <!-- Controles de búsqueda, filtro y orden -->
+    <div class="controles">
+      <input
+        type="search"
+        id="buscar"
+        placeholder="Buscar por título…"
+        aria-label="Buscar tareas"
+      >
+      <select id="filtro-prioridad" aria-label="Filtrar por prioridad">
+        <option value="todas">Todas las prioridades</option>
+        <option value="alta">Alta</option>
+        <option value="media">Media</option>
+        <option value="baja">Baja</option>
+      </select>
+      <select id="filtro-estado" aria-label="Filtrar por estado">
+        <option value="todas">Todos los estados</option>
+        <option value="pendientes">Pendientes</option>
+        <option value="completadas">Completadas</option>
+      </select>
+      <select id="orden" aria-label="Ordenar">
+        <option value="fecha-desc">Más recientes</option>
+        <option value="fecha-asc">Más antiguas</option>
+        <option value="prioridad-asc">Prioridad (alta → baja)</option>
+        <option value="prioridad-desc">Prioridad (baja → alta)</option>
+      </select>
+      <span id="contador"></span>
+    </div>
+
+    <!-- Lista de tareas -->
+    <section id="lista-tareas" aria-live="polite"></section>
+  </div>
+
+  <script type="module" src="dist/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# Dependencias
+node_modules/
+
+# Salida de compilación TypeScript
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,17 @@
+{
+  "name": "gestor-tareas",
+  "version": "1.0.0",
+  "description": "Gestor de Tareas por Prioridad - MVC con TypeScript",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && npx serve .",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "serve": "^14.2.0"
+  },
+  "keywords": ["tareas", "mvc", "typescript"],
+  "author": "",
+  "license": "MIT"
+}

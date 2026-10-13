@@ -1,0 +1,386 @@
+/* by Grok */
+:root {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface-2: #334155;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent-hover: #0ea5e9;
+  --danger: #f87171;
+  --danger-hover: #ef4444;
+  --success: #4ade80;
+  --alta: #f87171;
+  --media: #fbbf24;
+  --baja: #4ade80;
+  --radius: 10px;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ===== Layout ===== */
+.contenedor {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+header p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}
+
+/* ===== Formulario de alta ===== */
+.panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow);
+}
+
+.panel h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+#form-tarea {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1 1 180px;
+}
+
+.campo label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.campo input,
+.campo select {
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.95rem;
+  transition: border-color 0.15s;
+}
+
+.campo input:focus,
+.campo select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.btn-primario {
+  background: var(--accent);
+  color: #0f172a;
+  border: none;
+  border-radius: 6px;
+  padding: 0.55rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.btn-primario:hover {
+  background: var(--accent-hover);
+}
+
+#mensaje-error {
+  color: var(--danger);
+  font-size: 0.875rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(248, 113, 113, 0.12);
+  border-radius: 6px;
+}
+
+/* ===== Controles de filtro ===== */
+.controles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.controles input,
+.controles select {
+  background: var(--surface);
+  border: 1px solid var(--surface-2);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 0.45rem 0.7rem;
+  font-size: 0.875rem;
+}
+
+.controles input {
+  flex: 1 1 160px;
+}
+
+.controles select {
+  flex: 0 1 auto;
+}
+
+#contador {
+  width: 100%;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* ===== Lista de tarjetas ===== */
+#lista-tareas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.vacio {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2rem 1rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+
+.tarjeta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem;
+  border-left: 4px solid transparent;
+  box-shadow: var(--shadow);
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.tarjeta.prioridad-alta {
+  border-left-color: var(--alta);
+}
+
+.tarjeta.prioridad-media {
+  border-left-color: var(--media);
+}
+
+.tarjeta.prioridad-baja {
+  border-left-color: var(--baja);
+}
+
+.tarjeta.completada {
+  opacity: 0.55;
+}
+
+.tarjeta.completada .titulo {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.tarjeta-cuerpo {
+  flex: 1;
+  min-width: 0;
+}
+
+.checkbox-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+
+.checkbox-wrap input[type='checkbox'] {
+  margin-top: 0.25rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.titulo {
+  font-size: 1rem;
+  word-break: break-word;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.85rem;
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding-left: 1.7rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge-alta {
+  background: rgba(248, 113, 113, 0.2);
+  color: var(--alta);
+}
+
+.badge-media {
+  background: rgba(251, 191, 36, 0.2);
+  color: var(--media);
+}
+
+.badge-baja {
+  background: rgba(74, 222, 128, 0.2);
+  color: var(--baja);
+}
+
+.tarjeta-acciones {
+  display: flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.tarjeta-acciones button {
+  background: transparent;
+  border: 1px solid var(--surface-2);
+  color: var(--text-muted);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tarjeta-acciones .btn-editar:hover {
+  background: var(--surface-2);
+  color: var(--accent);
+}
+
+.tarjeta-acciones .btn-eliminar:hover {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--danger);
+}
+
+/* ===== Edición inline ===== */
+.input-editar-titulo,
+.select-editar-prioridad {
+  background: var(--surface-2);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 0.45rem 0.6rem;
+  font-size: 0.95rem;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.select-editar-prioridad {
+  width: auto;
+  min-width: 110px;
+}
+
+.edicion-acciones {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.edicion-acciones button {
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-guardar {
+  background: var(--accent);
+  color: #0f172a;
+}
+
+.btn-guardar:hover {
+  background: var(--accent-hover);
+}
+
+.btn-cancelar {
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.btn-cancelar:hover {
+  color: var(--text);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 520px) {
+  .controles {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controles select,
+  .controles input {
+    width: 100%;
+  }
+
+  #form-tarea {
+    flex-direction: column;
+  }
+
+  .btn-primario {
+    width: 100%;
+  }
+}
