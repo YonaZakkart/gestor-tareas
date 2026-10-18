@@ -56,7 +56,8 @@ export class TareaController {
     // Ordenamiento
     lista = this.ordenar(lista, criterios.orden);
 
-    this.vista.renderizar(lista, this.tareas.length);
+    const pendientesTotales = this.tareas.filter((t) => !t.completada).length;
+    this.vista.renderizar(lista, this.tareas.length, pendientesTotales);
   }
 
   private ordenar(lista: Tarea[], criterio: string): Tarea[] {
@@ -98,6 +99,7 @@ export class TareaController {
       this.vista.limpiarFormulario();
       this.vista.ocultarError();
       this.actualizarVista();
+      this.vista.mostrarMensaje('Tarea agregada', 'exito');
     } catch (error) {
       const mensaje = error instanceof Error ? error.message : 'Error al crear la tarea.';
       this.vista.mostrarError(mensaje);
@@ -110,6 +112,8 @@ export class TareaController {
     tarea.toggleCompletada();
     this.persistir();
     this.actualizarVista();
+    const estado = tarea.completada ? 'completada' : 'pendiente';
+    this.vista.mostrarMensaje(`Tarea marcada como ${estado}`, 'exito');
   }
 
   eliminar(id: string): void {
@@ -118,6 +122,7 @@ export class TareaController {
     this.tareas.splice(indice, 1);
     this.persistir();
     this.actualizarVista();
+    this.vista.mostrarMensaje('Tarea eliminada.', 'exito');
   }
 
   editar(id: string, titulo: string, prioridad: Prioridad): void {
@@ -128,6 +133,7 @@ export class TareaController {
       this.persistir();
       this.vista.ocultarError();
       this.actualizarVista();
+      this.vista.mostrarMensaje('Tarea actualizada', 'exito');
     } catch (error) {
       const mensaje = error instanceof Error ? error.message : 'Error al editar la tarea.';
       this.vista.mostrarError(mensaje);

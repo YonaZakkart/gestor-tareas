@@ -17,6 +17,8 @@ export class TareaView {
   private btnExportar: HTMLButtonElement;
   private btnImportar: HTMLButtonElement;
   private inputImportar: HTMLInputElement;
+  // auto-ocultar msjs
+  private temporizadorMensaje: ReturnType<typeof setTimeout> | null = null;
 
   // Callbacks que el controlador registra
   onAgregar: ((titulo: string, prioridad: Prioridad) => void) | null = null;
@@ -109,19 +111,36 @@ export class TareaView {
 
   /**
    * Muestra un mensaje (error o éxito).
+   * Los de éxito se ocultan solos a los 2,5 s.
    */
   mostrarMensaje(mensaje: string, tipo: 'error' | 'exito' = 'error'): void {
+    if (this.temporizadorMensaje !== null) {
+      clearTimeout(this.temporizadorMensaje);
+      this.temporizadorMensaje = null;
+    }
+
     this.mensajeError.textContent = mensaje;
     this.mensajeError.hidden = false;
     this.mensajeError.classList.toggle('es-exito', tipo === 'exito');
+
+    if (tipo === 'exito') {
+      this.temporizadorMensaje = setTimeout(() => {
+        this.ocultarError();
+        this.temporizadorMensaje = null;
+      }, 2500);
+    }
   }
 
-  /** @deprecated Usar mostrarMensaje */
+  /** Compatibilidad con llamadas existentes */
   mostrarError(mensaje: string): void {
     this.mostrarMensaje(mensaje, 'error');
   }
 
   ocultarError(): void {
+    if (this.temporizadorMensaje !== null) {
+      clearTimeout(this.temporizadorMensaje);
+      this.temporizadorMensaje = null;
+    }
     this.mensajeError.hidden = true;
     this.mensajeError.textContent = '';
     this.mensajeError.classList.remove('es-exito');
@@ -142,13 +161,31 @@ export class TareaView {
     };
   }
 
-  //Renderiza la lista de tareas con colores según prioridad
-  renderizar(tareas: Tarea[], totalOriginal: number): void {
+  /**
+   * @param tareas filtrada y ordenada
+   * @param totalOriginal Cantidad total sin filtros
+   * @param pendientesTotales Pendientes en el listado completo
+   */
+  renderizar(
+    tareas: Tarea[],
+    totalOriginal: number,
+    pendientesTotales: number
+  ): void {
     this.contenedorLista.innerHTML = '';
 
-    if (tareas.length === 0) {
+    if (totalOriginal === 0) {
       this.contenedorLista.innerHTML = `
-        <p class="vacio">No hay tareas que coincidan con los criterios.</p>
+        <p class="vacio vacio-inicial">
+          No hay tareas aún.<br>
+          <span class="vacio-hint">Escribe un título arriba y pulsa <strong>Agregar</strong>.</span>
+        </p>
+      `;
+    } else if (tareas.length === 0) {
+      this.contenedorLista.innerHTML = `
+        <p class="vacio vacio-filtro">
+          Ninguna tarea coincide con la búsqueda o los filtros.
+          <span class="vacio-hint">Prueba a limpiar el buscador o cambiar prioridad/estado.</span>
+        </p>
       `;
     } else {
       const fragment = document.createDocumentFragment();
@@ -158,8 +195,27 @@ export class TareaView {
       this.contenedorLista.appendChild(fragment);
     }
 
-    const pendientes = tareas.filter((t) => !t.completada).length;
-    this.contador.textContent = `${tareas.length} mostradas · ${pendientes} pendientes · ${totalOriginal} totales`;
+    const completadas = totalOriginal - pendientesTotales;
+    this.contador.textContent =
+      totalOriginal === 0
+        ? 'Sin tareas'
+        : `${tareas.length} mostrada${tareas.length !== 1 ? 's' : ''} · ` +
+          `${pendientesTotales} pendiente${pendientesTotales !== 1 ? 's' : ''} · ` +
+          `${completadas} completada${completadas !== 1 ? 's' : ''} · ` +
+          `${totalOriginal} en total`;
+  }
+
+  /**
+   * Pendientes del conjunto filtrado no bastan para el contador global.
+   * El controlador solo pasa la lista filtrada; recalculamos pendientes totales
+   * pidiendo al DOM… mejor: el controlador pasará un resumen. Ver nota abajo.
+   */
+  private contarPendientes(
+    _filtradas: Tarea[],
+    _totalOriginal: number
+  ): { totalesPendientes: number } {
+    // Placeholder: se corrige en el punto 2 con firma ampliada
+    return { totalesPendientes: 0 };
   }
 
   private crearTarjeta(tarea: Tarea): HTMLElement {

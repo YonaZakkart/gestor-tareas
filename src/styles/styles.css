@@ -185,6 +185,22 @@ header p {
   padding: 2rem 1rem;
   background: var(--surface);
   border-radius: var(--radius);
+  line-height: 1.6;
+}
+
+.vacio-hint {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  opacity: 0.85;
+}
+
+.vacio-inicial {
+  border: 1px dashed var(--surface-2);
+}
+
+.vacio-filtro {
+  border: 1px solid var(--surface-2);
 }
 
 .tarjeta {
