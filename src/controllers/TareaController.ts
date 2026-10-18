@@ -7,6 +7,9 @@ import { StorageService } from '../services/StorageService.js';
 export class TareaController {
   private tareas: Tarea[] = [];
   private vista: TareaView;
+  // funcionalidad de deshacer
+  private ultimaEliminada: { tarea: Tarea; indice: number } | null = null;
+  private temporizadorDeshacer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(vista: TareaView) {
     this.vista = vista;
@@ -24,6 +27,8 @@ export class TareaController {
     //callbacks de import/export
     this.vista.onExportar = () => this.exportar();
     this.vista.onImportar = (archivo) => this.importar(archivo);
+    //para deshacer
+    this.vista.onDeshacerEliminar = () => this.deshacerEliminar();
   }
 
   private persistir(): void {
@@ -115,14 +120,50 @@ export class TareaController {
     const estado = tarea.completada ? 'completada' : 'pendiente';
     this.vista.mostrarMensaje(`Tarea marcada como ${estado}`, 'exito');
   }
-
+  
   eliminar(id: string): void {
     const indice = this.tareas.findIndex((t) => t.id === id);
     if (indice === -1) return;
-    this.tareas.splice(indice, 1);
+
+    const [eliminada] = this.tareas.splice(indice, 1);
+    this.ultimaEliminada = { tarea: eliminada, indice };
     this.persistir();
     this.actualizarVista();
-    this.vista.mostrarMensaje('Tarea eliminada.', 'exito');
+
+    if (this.temporizadorDeshacer !== null) {
+      clearTimeout(this.temporizadorDeshacer);
+    }
+
+    this.vista.mostrarMensajeConDeshacer(
+      `«${eliminada.titulo}» eliminada.`,
+      () => this.deshacerEliminar()
+    );
+
+    this.temporizadorDeshacer = setTimeout(() => {
+      this.ultimaEliminada = null;
+      this.temporizadorDeshacer = null;
+      this.vista.ocultarError();
+    }, 5000);
+  }
+
+  /**
+   * Restaura la última tarea eliminada (si el plazo no expiró).
+   */
+  deshacerEliminar(): void {
+    if (!this.ultimaEliminada) return;
+
+    if (this.temporizadorDeshacer !== null) {
+      clearTimeout(this.temporizadorDeshacer);
+      this.temporizadorDeshacer = null;
+    }
+
+    const { tarea, indice } = this.ultimaEliminada;
+    const pos = Math.min(indice, this.tareas.length);
+    this.tareas.splice(pos, 0, tarea);
+    this.ultimaEliminada = null;
+    this.persistir();
+    this.actualizarVista();
+    this.vista.mostrarMensaje('Eliminación deshecha.', 'exito');
   }
 
   editar(id: string, titulo: string, prioridad: Prioridad): void {
