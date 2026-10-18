@@ -5,13 +5,20 @@
   "scripts": {
     "build": "tsc",
     "start": "tsc && npx serve .",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
+    "serve": "^14.2.0",
     "typescript": "^5.4.0",
-    "serve": "^14.2.0"
+    "vitest": "^5.0.5"
   },
-  "keywords": ["tareas", "mvc", "typescript"],
+  "keywords": [
+    "tareas",
+    "mvc",
+    "typescript"
+  ],
   "author": "",
   "license": "MIT"
 }
