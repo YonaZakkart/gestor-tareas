@@ -72,6 +72,13 @@ npm run dev
 # y en otra: npx serve .
 ```
 
+## Tests
+
+```bash
+npm test          # una pasada
+npm run test:watch 
+```
+
 Abra la URL que muestre el servidor (normalmente `http://localhost:3000`).
 
 ## Uso de la interfaz
