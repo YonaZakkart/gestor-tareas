@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestor de Tareas por Prioridad</title>
   <link rel="stylesheet" href="src/styles/styles.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
+
 <body>
   <div class="contenedor">
     <header>
@@ -19,14 +22,7 @@
       <form id="form-tarea" autocomplete="off">
         <div class="campo">
           <label for="titulo">Título</label>
-          <input
-            type="text"
-            id="titulo"
-            name="titulo"
-            placeholder="¿Qué hay que hacer?"
-            maxlength="120"
-            required
-          >
+          <input type="text" id="titulo" name="titulo" placeholder="¿Qué hay que hacer?" maxlength="120" required>
         </div>
         <div class="campo">
           <label for="prioridad">Prioridad</label>
@@ -43,12 +39,7 @@
 
     <!-- Controles de búsqueda, filtro y orden -->
     <div class="controles">
-      <input
-        type="search"
-        id="buscar"
-        placeholder="Buscar por título…"
-        aria-label="Buscar tareas"
-      >
+      <input type="search" id="buscar" placeholder="Buscar por título…" aria-label="Buscar tareas">
       <select id="filtro-prioridad" aria-label="Filtrar por prioridad">
         <option value="todas">Todas las prioridades</option>
         <option value="alta">Alta</option>
@@ -82,4 +73,5 @@
 
   <script type="module" src="dist/main.js"></script>
 </body>
+
 </html>
