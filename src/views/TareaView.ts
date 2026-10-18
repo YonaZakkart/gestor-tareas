@@ -1,7 +1,7 @@
 import { Tarea, Prioridad } from '../models/Tarea.js';
 
 // Vista responsable de renderizar la interfaz y de notificar
- // acciones del usuario mediante callbacks
+// acciones del usuario mediante callbacks
 export class TareaView {
   private contenedorLista: HTMLElement;
   private formulario: HTMLFormElement;
@@ -13,6 +13,10 @@ export class TareaView {
   private selectOrden: HTMLSelectElement;
   private mensajeError: HTMLElement;
   private contador: HTMLElement;
+  // Agregados para exportar e importar
+  private btnExportar: HTMLButtonElement;
+  private btnImportar: HTMLButtonElement;
+  private inputImportar: HTMLInputElement;
 
   // Callbacks que el controlador registra
   onAgregar: ((titulo: string, prioridad: Prioridad) => void) | null = null;
@@ -20,6 +24,9 @@ export class TareaView {
   onEliminar: ((id: string) => void) | null = null;
   onEditar: ((id: string, titulo: string, prioridad: Prioridad) => void) | null = null;
   onFiltrarOrdenar: (() => void) | null = null;
+  // Callbacks para exportar e importar
+  onExportar: (() => void) | null = null;
+  onImportar: ((archivo: File) => void) | null = null;
 
   constructor() {
     this.contenedorLista = this.requerirElemento('#lista-tareas');
@@ -32,6 +39,10 @@ export class TareaView {
     this.selectOrden = this.requerirElemento('#orden') as HTMLSelectElement;
     this.mensajeError = this.requerirElemento('#mensaje-error');
     this.contador = this.requerirElemento('#contador');
+    // Inicializar elementos para exportar e importar
+    this.btnExportar = this.requerirElemento('#btn-exportar') as HTMLButtonElement;
+    this.btnImportar = this.requerirElemento('#btn-importar') as HTMLButtonElement;
+    this.inputImportar = this.requerirElemento('#input-importar') as HTMLInputElement;
 
     this.vincularEventos();
   }
@@ -70,6 +81,22 @@ export class TareaView {
     this.selectOrden.addEventListener('change', () => {
       if (this.onFiltrarOrdenar) this.onFiltrarOrdenar();
     });
+
+    this.btnExportar.addEventListener('click', () => {
+      if (this.onExportar) this.onExportar();
+    });
+
+    this.btnImportar.addEventListener('click', () => {
+      this.inputImportar.value = ''; // permite reimportar el mismo archivo
+      this.inputImportar.click();
+    });
+
+    this.inputImportar.addEventListener('change', () => {
+      const archivo = this.inputImportar.files?.[0];
+      if (archivo && this.onImportar) {
+        this.onImportar(archivo);
+      }
+    });
   }
 
   /**
@@ -81,16 +108,23 @@ export class TareaView {
   }
 
   /**
-   * Muestra un mensaje de error temporal.
+   * Muestra un mensaje (error o éxito).
    */
-  mostrarError(mensaje: string): void {
+  mostrarMensaje(mensaje: string, tipo: 'error' | 'exito' = 'error'): void {
     this.mensajeError.textContent = mensaje;
     this.mensajeError.hidden = false;
+    this.mensajeError.classList.toggle('es-exito', tipo === 'exito');
+  }
+
+  /** @deprecated Usar mostrarMensaje */
+  mostrarError(mensaje: string): void {
+    this.mostrarMensaje(mensaje, 'error');
   }
 
   ocultarError(): void {
     this.mensajeError.hidden = true;
     this.mensajeError.textContent = '';
+    this.mensajeError.classList.remove('es-exito');
   }
 
   //Obtiene los criterios actuales de filtro y orden

@@ -21,6 +21,9 @@ export class TareaController {
     this.vista.onEliminar = (id) => this.eliminar(id);
     this.vista.onEditar = (id, titulo, prioridad) => this.editar(id, titulo, prioridad);
     this.vista.onFiltrarOrdenar = () => this.actualizarVista();
+    //callbacks de import/export
+    this.vista.onExportar = () => this.exportar();
+    this.vista.onImportar = (archivo) => this.importar(archivo);
   }
 
   private persistir(): void {
@@ -130,5 +133,81 @@ export class TareaController {
       this.vista.mostrarError(mensaje);
       this.actualizarVista();
     }
+  }
+
+  /**
+ * Descarga un archivo JSON con todas las tareas actuales.
+ */
+  exportar(): void {
+    try {
+      const datos = this.tareas.map((t) => t.toJSON());
+      const blob = new Blob([JSON.stringify(datos, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const enlace = document.createElement('a');
+      const fecha = new Date().toISOString().slice(0, 10);
+      enlace.href = url;
+      enlace.download = `tareas-${fecha}.json`;
+      enlace.click();
+      URL.revokeObjectURL(url);
+      this.vista.mostrarMensaje(`Exportadas ${this.tareas.length} tarea(s).`, 'exito');
+    } catch (error) {
+      const mensaje = error instanceof Error ? error.message : 'Error al exportar.';
+      this.vista.mostrarMensaje(mensaje, 'error');
+    }
+  }
+
+  /**
+   * Lee un archivo JSON, valida cada tarea y reemplaza el listado actual.
+   * Pide confirmación si ya hay tareas.
+   */
+  importar(archivo: File): void {
+    if (this.tareas.length > 0) {
+      const ok = confirm(
+        `Se reemplazarán las ${this.tareas.length} tarea(s) actuales por el contenido del archivo. ¿Continuar?`
+      );
+      if (!ok) return;
+    }
+
+    const lector = new FileReader();
+    lector.onload = () => {
+      try {
+        const texto = lector.result;
+        if (typeof texto !== 'string') {
+          throw new Error('No se pudo leer el archivo');
+        }
+        const parsed: unknown = JSON.parse(texto);
+        if (!Array.isArray(parsed)) {
+          throw new Error('El archivo debe contener un array de tareas');
+        }
+        if (parsed.length === 0) {
+          throw new Error('El archivo no contiene tareas.');
+        }
+
+        const importadas: Tarea[] = [];
+        for (let i = 0; i < parsed.length; i++) {
+          try {
+            importadas.push(Tarea.fromJSON(parsed[i] as Record<string, unknown>));
+          } catch (e) {
+            const detalle = e instanceof Error ? e.message : 'datos inválidos';
+            throw new Error(`Tarea en posición ${i + 1}: ${detalle}`);
+          }
+        }
+
+        this.tareas = importadas;
+        this.persistir();
+        this.vista.ocultarError();
+        this.actualizarVista();
+        this.vista.mostrarMensaje(`Importadas ${importadas.length} tarea(s).`, 'exito');
+      } catch (error) {
+        const mensaje = error instanceof Error ? error.message : 'Error al importar';
+        this.vista.mostrarMensaje(mensaje, 'error');
+      }
+    };
+    lector.onerror = () => {
+      this.vista.mostrarMensaje('No se pudo leer el archivo', 'error');
+    };
+    lector.readAsText(archivo);
   }
 }
