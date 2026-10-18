@@ -18,12 +18,11 @@ ___
 
 ### Importar / exportar JSON
 
-<video src="docs/videos/01-export-import.mp4" controls="controls" width="100%">
-</video>
+<video src="https://github.com/YonaZakkart/gestor-tareas/raw/main/docs/videos/01-export-import.mp4" controls="controls" width="100%"></video>
 
 ### Deshacer eliminación
 
-<video src="docs/videos/02-deshacer.mp4" controls="controls" width="100%">
+<video src="https://github.com/YonaZakkart/gestor-tareas/raw/main/docs/videos/02-deshacer.mp4" controls="controls" width="100%"></video>
 </video>
 
 ## Características
