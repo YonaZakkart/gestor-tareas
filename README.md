@@ -3,11 +3,12 @@
 Aplicación web de gestión de tareas con prioridades (alta, media, baja), filtros, ordenamiento y persistencia en `localStorage`.  
 Implementada con **TypeScript** y arquitectura **MVC**.
 
-## Demo
+<div align="center">
 
-**Probar en vivo:** 
-
+**Probar en vivo:** <br><br>
 [![Demo en vivo](https://img.shields.io/badge/Demo-Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://gestor-de-tareas-yonazakkart.netlify.app/)
+
+</div>
 
 ___
 
@@ -17,11 +18,13 @@ ___
 
 ### Importar / exportar JSON
 
-[Video: exportar e importar tareas](docs/videos/01-export-import.mp4)
+<video src="docs/videos/01-export-import.mp4" controls="controls" width="100%">
+</video>
 
 ### Deshacer eliminación
 
-[Video: deshacer la última eliminación](docs/videos/02-deshacer.mp4)
+<video src="docs/videos/02-deshacer.mp4" controls="controls" width="100%">
+</video>
 
 ## Características
 
