@@ -29,6 +29,8 @@ export class TareaView {
   // Callbacks para exportar e importar
   onExportar: (() => void) | null = null;
   onImportar: ((archivo: File) => void) | null = null;
+  // para deshacer
+  onDeshacerEliminar: (() => void) | null = null;
 
   constructor() {
     this.contenedorLista = this.requerirElemento('#lista-tareas');
@@ -99,6 +101,38 @@ export class TareaView {
         this.onImportar(archivo);
       }
     });
+
+    document.addEventListener('keydown', (e) => {
+      const target = e.target as HTMLElement;
+      const enCampo =
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.isContentEditable;
+
+      // Escape: salir de campos / cancelar ruido de UI
+      if (e.key === 'Escape') {
+        if (enCampo) {
+          (target as HTMLInputElement).blur();
+        }
+        this.ocultarError();
+        return;
+      }
+
+      // No interceptar si se escribe en un input
+      if (enCampo) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault();
+        this.inputTitulo.focus();
+      }
+
+      if (e.key === '/') {
+        e.preventDefault();
+        this.inputBuscar.focus();
+      }
+    });
   }
 
   /**
@@ -119,6 +153,7 @@ export class TareaView {
       this.temporizadorMensaje = null;
     }
 
+    this.mensajeError.innerHTML = '';
     this.mensajeError.textContent = mensaje;
     this.mensajeError.hidden = false;
     this.mensajeError.classList.toggle('es-exito', tipo === 'exito');
@@ -143,7 +178,35 @@ export class TareaView {
     }
     this.mensajeError.hidden = true;
     this.mensajeError.textContent = '';
+    this.mensajeError.innerHTML = '';
     this.mensajeError.classList.remove('es-exito');
+  }
+
+  /**
+ * Mensaje de eliminación con botón Deshacer (válido ~5 s en el controlador).
+ */
+  mostrarMensajeConDeshacer(mensaje: string, alDeshacer: () => void): void {
+    if (this.temporizadorMensaje !== null) {
+      clearTimeout(this.temporizadorMensaje);
+      this.temporizadorMensaje = null;
+    }
+
+    this.mensajeError.classList.remove('es-exito');
+    this.mensajeError.hidden = false;
+    this.mensajeError.innerHTML = '';
+
+    const texto = document.createElement('span');
+    texto.textContent = `${mensaje} `;
+
+    const boton = document.createElement('button');
+    boton.type = 'button';
+    boton.className = 'btn-deshacer';
+    boton.textContent = 'Deshacer';
+    boton.addEventListener('click', () => {
+      alDeshacer();
+    });
+
+    this.mensajeError.append(texto, boton);
   }
 
   //Obtiene los criterios actuales de filtro y orden
@@ -200,9 +263,9 @@ export class TareaView {
       totalOriginal === 0
         ? 'Sin tareas'
         : `${tareas.length} mostrada${tareas.length !== 1 ? 's' : ''} · ` +
-          `${pendientesTotales} pendiente${pendientesTotales !== 1 ? 's' : ''} · ` +
-          `${completadas} completada${completadas !== 1 ? 's' : ''} · ` +
-          `${totalOriginal} en total`;
+        `${pendientesTotales} pendiente${pendientesTotales !== 1 ? 's' : ''} · ` +
+        `${completadas} completada${completadas !== 1 ? 's' : ''} · ` +
+        `${totalOriginal} en total`;
   }
 
   /**
