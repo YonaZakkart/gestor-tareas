@@ -17,13 +17,12 @@ ___
 ![Listado de tareas](docs/capturas/01-listado.png)
 
 ### Importar / exportar JSON
-
-<video src="https://github.com/YonaZakkart/gestor-tareas/raw/main/docs/videos/01-export-import.mp4" controls="controls" width="100%"></video>
+|:---:|:---:|
+| ![Imortar JSON](docs/capturas/01-import.png) | ![JSON importado](docs/capturas/02-import.png) |
 
 ### Deshacer eliminación
-
-<video src="https://github.com/YonaZakkart/gestor-tareas/raw/main/docs/videos/02-deshacer.mp4" controls="controls" width="100%"></video>
-</video>
+|:---:|:---:|
+| ![Deshacer](docs/capturas/01-deshacer.png) | ![Reestablecer Deshacer](docs/capturas/02-deshacer.png) |
 
 ## Características
 
