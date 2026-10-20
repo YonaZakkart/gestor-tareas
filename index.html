@@ -5,8 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestor de Tareas por Prioridad</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="src/styles/styles.css">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
 
 <body>
@@ -16,7 +16,6 @@
       <p>Organiza por prioridad · Atajos: <kbd>N</kbd> nueva · <kbd>/</kbd> buscar · <kbd>Esc</kbd></p>
     </header>
 
-    <!-- Formulario de alta -->
     <section class="panel">
       <h2>Nueva tarea</h2>
       <form id="form-tarea" autocomplete="off">
@@ -32,43 +31,79 @@
             <option value="baja">Baja</option>
           </select>
         </div>
+        <div class="campo">
+          <label for="categoria">Categoría</label>
+          <select id="categoria" name="categoria" required>
+            <option value="trabajo">Trabajo</option>
+            <option value="personal" selected>Personal</option>
+            <option value="estudio">Estudio</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="fecha-limite">Fecha límite</label>
+          <input type="date" id="fecha-limite" name="fecha-limite">
+        </div>
         <button type="submit" class="btn-primario">Agregar</button>
       </form>
       <p id="mensaje-error" hidden role="alert"></p>
     </section>
 
-    <!-- Controles de búsqueda, filtro y orden -->
-    <div class="controles">
-      <input type="search" id="buscar" placeholder="Buscar por título…" aria-label="Buscar tareas">
-      <select id="filtro-prioridad" aria-label="Filtrar por prioridad">
-        <option value="todas">Todas las prioridades</option>
-        <option value="alta">Alta</option>
-        <option value="media">Media</option>
-        <option value="baja">Baja</option>
-      </select>
-      <select id="filtro-estado" aria-label="Filtrar por estado">
-        <option value="todas">Todos los estados</option>
-        <option value="pendientes">Pendientes</option>
-        <option value="completadas">Completadas</option>
-      </select>
-      <select id="orden" aria-label="Ordenar">
-        <option value="fecha-desc">Más recientes</option>
-        <option value="fecha-asc">Más antiguas</option>
-        <option value="prioridad-asc">Prioridad (alta → baja)</option>
-        <option value="prioridad-desc">Prioridad (baja → alta)</option>
-      </select>
-      <span id="contador"></span>
+    <nav class="pestanas" role="tablist">
+      <button type="button" class="pestana activa" data-vista="lista" role="tab">Lista</button>
+      <button type="button" class="pestana" data-vista="resumen" role="tab">Resumen</button>
+    </nav>
+
+    <div id="vista-lista">
+      <div class="controles">
+        <input type="search" id="buscar" placeholder="Buscar por título…" aria-label="Buscar tareas">
+        <select id="filtro-prioridad" aria-label="Filtrar por prioridad">
+          <option value="todas">Todas las prioridades</option>
+          <option value="alta">Alta</option>
+          <option value="media">Media</option>
+          <option value="baja">Baja</option>
+        </select>
+        <select id="filtro-categoria" aria-label="Filtrar por categoría">
+          <option value="todas">Todas las categorías</option>
+          <option value="trabajo">Trabajo</option>
+          <option value="personal">Personal</option>
+          <option value="estudio">Estudio</option>
+          <option value="otro">Otro</option>
+        </select>
+        <select id="filtro-estado" aria-label="Filtrar por estado">
+          <option value="todas">Todos los estados</option>
+          <option value="pendientes">Pendientes</option>
+          <option value="completadas">Completadas</option>
+          <option value="vencidas">Vencidas</option>
+        </select>
+        <select id="orden" aria-label="Ordenar">
+          <option value="fecha-desc">Más recientes</option>
+          <option value="fecha-asc">Más antiguas</option>
+          <option value="prioridad-asc">Prioridad (alta → baja)</option>
+          <option value="prioridad-desc">Prioridad (baja → alta)</option>
+          <option value="titulo-asc">Título (A → Z)</option>
+          <option value="titulo-desc">Título (Z → A)</option>
+          <option value="limite-asc">Fecha límite (próximas)</option>
+        </select>
+        <span id="contador"></span>
+      </div>
+
+      <div class="acciones-datos">
+        <button type="button" id="btn-exportar" class="btn-secundario">Exportar JSON</button>
+        <button type="button" id="btn-importar" class="btn-secundario">Importar JSON</button>
+        <input type="file" id="input-importar" accept=".json,application/json" hidden>
+      </div>
+
+      <section id="lista-tareas" aria-live="polite"></section>
     </div>
 
-    <!-- Exportar / Importar -->
-    <div class="acciones-datos">
-      <button type="button" id="btn-exportar" class="btn-secundario">Exportar JSON</button>
-      <button type="button" id="btn-importar" class="btn-secundario">Importar JSON</button>
-      <input type="file" id="input-importar" accept=".json,application/json" hidden>
+    <div id="vista-resumen" hidden>
+      <section class="panel panel-resumen">
+        <h2>Resumen por prioridad</h2>
+        <div id="stats-prioridad" class="stats-grid"></div>
+        <p id="stats-extra" class="stats-extra"></p>
+      </section>
     </div>
-
-    <!-- Lista de tareas -->
-    <section id="lista-tareas" aria-live="polite"></section>
   </div>
 
   <script type="module" src="dist/main.js"></script>

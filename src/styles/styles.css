@@ -549,3 +549,61 @@ kbd {
   border: 1px solid var(--surface-2);
   color: var(--text-muted);
 }
+
+.tarjeta.vencida {
+  border-left-color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+}
+.texto-vencida, .alerta-vencida {
+  color: #f87171;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+.badge-cat {
+  background: rgba(148, 163, 184, 0.2);
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+.pestanas {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+.pestana {
+  background: var(--surface);
+  border: 1px solid var(--surface-2);
+  color: var(--text-muted);
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.pestana.activa {
+  background: var(--accent);
+  color: #0f172a;
+  border-color: var(--accent);
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+.stat {
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+.stat-n {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+.stat.alta .stat-n { color: var(--alta); }
+.stat.media .stat-n { color: var(--media); }
+.stat.baja .stat-n { color: var(--baja); }
+.stats-extra {
+  margin-top: 1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
