@@ -412,23 +412,113 @@ header p {
 }
 
 /* ===== Responsive ===== */
-@media (max-width: 520px) {
-  .controles {
+
+/* Evita zoom automático en iOS al enfocar inputs */
+.campo input,
+.campo select,
+.controles input,
+.controles select,
+.input-editar-titulo,
+.select-editar-prioridad {
+  font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  .contenedor {
+    padding: 1rem 0.75rem 2.5rem;
+  }
+
+  header h1 {
+    font-size: 1.4rem;
+  }
+
+  header p {
+    font-size: 0.85rem;
+  }
+
+  .panel {
+    padding: 1rem;
+  }
+
+  /* Formulario: una columna, todo al ancho */
+  #form-tarea {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .controles select,
-  .controles input {
+  .campo {
+    flex: 1 1 auto;
     width: 100%;
   }
 
-  #form-tarea {
-    flex-direction: column;
+  .campo input,
+  .campo select {
+    width: 100%;
   }
 
   .btn-primario {
     width: 100%;
+    padding: 0.7rem 1rem;
+  }
+
+  /* Buscador + filtros: columna completa */
+  .controles {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .controles input,
+  .controles select {
+    width: 100%;
+    flex: none;
+    min-height: 2.75rem;
+  }
+
+  #contador {
+    margin-top: 0.15rem;
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  /* Exportar / Importar (si existen en tu HTML) */
+  .acciones-datos {
+    flex-direction: column;
+  }
+
+  .acciones-datos .btn-secundario {
+    width: 100%;
+    text-align: center;
+    padding: 0.6rem 0.9rem;
+  }
+
+  /* Tarjetas: acciones no se comprimen de más */
+  .tarjeta {
+    padding: 0.85rem 0.75rem;
+  }
+
+  .tarjeta-acciones button {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .meta {
+    padding-left: 1.7rem;
+  }
+}
+
+/* Móviles muy estrechos */
+@media (max-width: 380px) {
+  .contenedor {
+    padding: 0.75rem 0.5rem 2rem;
+  }
+
+  header h1 {
+    font-size: 1.25rem;
+  }
+
+  .badge {
+    font-size: 0.65rem;
   }
 }
 
