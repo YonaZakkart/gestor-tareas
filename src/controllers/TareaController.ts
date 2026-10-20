@@ -1,13 +1,13 @@
-import { Tarea, Prioridad } from '../models/Tarea.js';
+import { Tarea, Prioridad, Categoria } from '../models/Tarea.js';
 import { TareaView } from '../views/TareaView.js';
 import { StorageService } from '../services/StorageService.js';
 
-// Contiene la lógica de filtrado, ordenamiento y CRUD.
-
+/**
+ * Controlador: CRUD, filtros, orden, import/export y deshacer.
+ */
 export class TareaController {
   private tareas: Tarea[] = [];
   private vista: TareaView;
-  // funcionalidad de deshacer
   private ultimaEliminada: { tarea: Tarea; indice: number } | null = null;
   private temporizadorDeshacer: ReturnType<typeof setTimeout> | null = null;
 
@@ -19,50 +19,87 @@ export class TareaController {
   }
 
   private registrarCallbacks(): void {
-    this.vista.onAgregar = (titulo, prioridad) => this.agregar(titulo, prioridad);
+    this.vista.onAgregar = (titulo, prioridad, categoria, fechaLimite) =>
+      this.agregar(titulo, prioridad, categoria, fechaLimite);
     this.vista.onToggle = (id) => this.toggle(id);
     this.vista.onEliminar = (id) => this.eliminar(id);
-    this.vista.onEditar = (id, titulo, prioridad) => this.editar(id, titulo, prioridad);
+    this.vista.onEditar = (id, titulo, prioridad, categoria, fechaLimite) =>
+      this.editar(id, titulo, prioridad, categoria, fechaLimite);
     this.vista.onFiltrarOrdenar = () => this.actualizarVista();
-    //callbacks de import/export
+    this.vista.onDeshacerEliminar = () => this.deshacerEliminar();
     this.vista.onExportar = () => this.exportar();
     this.vista.onImportar = (archivo) => this.importar(archivo);
-    //para deshacer
-    this.vista.onDeshacerEliminar = () => this.deshacerEliminar();
   }
 
   private persistir(): void {
     StorageService.guardar(this.tareas);
   }
 
+  private getContadorPorPrioridad(): { alta: number; media: number; baja: number } {
+    const c = { alta: 0, media: 0, baja: 0 };
+    for (const t of this.tareas) {
+      c[t.prioridad]++;
+    }
+    return c;
+  }
+
+  private getTareasVencidas(): Tarea[] {
+    return this.tareas.filter((t) => t.estaVencida());
+  }
+
+  private parseFechaLimite(valor: string): Date | null {
+    if (!valor.trim()) return null;
+    const d = new Date(valor.length === 10 ? valor + 'T12:00:00' : valor);
+    if (Number.isNaN(d.getTime())) {
+      throw new Error('Fecha límite inválida.');
+    }
+    return d;
+  }
+
   private actualizarVista(): void {
     const criterios = this.vista.obtenerCriterios();
     let lista = [...this.tareas];
 
-    // Filtro por búsqueda (título)
     if (criterios.busqueda) {
-      lista = lista.filter((t) =>
-        t.titulo.toLowerCase().includes(criterios.busqueda)
-      );
+      lista = lista.filter((t) => t.titulo.toLowerCase().includes(criterios.busqueda));
     }
 
-    // Filtro por prioridad
     if (criterios.prioridad !== 'todas') {
       lista = lista.filter((t) => t.prioridad === criterios.prioridad);
     }
 
-    // Filtro por estado
+    if (criterios.categoria !== 'todas') {
+      lista = lista.filter((t) => t.categoria === criterios.categoria);
+    }
+
     if (criterios.estado === 'pendientes') {
       lista = lista.filter((t) => !t.completada);
     } else if (criterios.estado === 'completadas') {
       lista = lista.filter((t) => t.completada);
+    } else if (criterios.estado === 'vencidas') {
+      lista = lista.filter((t) => t.estaVencida());
     }
 
-    // Ordenamiento
     lista = this.ordenar(lista, criterios.orden);
 
+    const contadorPrioridad = this.getContadorPorPrioridad();
+    const vencidas = this.getTareasVencidas().length;
     const pendientesTotales = this.tareas.filter((t) => !t.completada).length;
-    this.vista.renderizar(lista, this.tareas.length, pendientesTotales);
+    const completadas = this.tareas.filter((t) => t.completada).length;
+
+    this.vista.renderizar(
+      lista,
+      this.tareas.length,
+      pendientesTotales,
+      contadorPrioridad,
+      vencidas
+    );
+    this.vista.renderResumen(
+      contadorPrioridad,
+      this.tareas.length,
+      vencidas,
+      completadas
+    );
   }
 
   private ordenar(lista: Tarea[], criterio: string): Tarea[] {
@@ -71,42 +108,72 @@ export class TareaController {
       media: 1,
       baja: 2,
     };
-
     const copia = [...lista];
 
     switch (criterio) {
       case 'prioridad-asc':
-        // Alta primero
-        copia.sort((a, b) => pesoPrioridad[a.prioridad] - pesoPrioridad[b.prioridad]);
+        copia.sort(
+          (a, b) => pesoPrioridad[a.prioridad] - pesoPrioridad[b.prioridad]
+        );
         break;
       case 'prioridad-desc':
-        // Baja primero
-        copia.sort((a, b) => pesoPrioridad[b.prioridad] - pesoPrioridad[a.prioridad]);
+        copia.sort(
+          (a, b) => pesoPrioridad[b.prioridad] - pesoPrioridad[a.prioridad]
+        );
         break;
       case 'fecha-asc':
-        // Más antiguas primero
         copia.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
+        break;
+      case 'titulo-asc':
+        copia.sort((a, b) => a.titulo.localeCompare(b.titulo, 'es', { sensitivity: 'base' }));
+        break;
+      case 'titulo-desc':
+        copia.sort((a, b) => b.titulo.localeCompare(a.titulo, 'es', { sensitivity: 'base' }));
+        break;
+      case 'limite-asc':
+        copia.sort((a, b) => {
+          if (!a.fechaLimite && !b.fechaLimite) return 0;
+          if (!a.fechaLimite) return 1;
+          if (!b.fechaLimite) return -1;
+          return a.fechaLimite.getTime() - b.fechaLimite.getTime();
+        });
         break;
       case 'fecha-desc':
       default:
-        // Más recientes primero
         copia.sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
         break;
     }
     return copia;
   }
 
-  agregar(titulo: string, prioridad: Prioridad): void {
+  agregar(
+    titulo: string,
+    prioridad: Prioridad,
+    categoria: Categoria,
+    fechaLimiteStr: string
+  ): void {
     try {
-      const nueva = new Tarea(titulo, prioridad);
+      const limite = this.parseFechaLimite(fechaLimiteStr);
+      const nueva = new Tarea(titulo, prioridad, categoria, limite);
+
+      const duplicada = this.tareas.some(
+        (t) =>
+          !t.completada &&
+          t.titulo.toLowerCase() === nueva.titulo.toLowerCase()
+      );
+      if (duplicada) {
+        throw new Error('Ya existe una tarea pendiente con ese título.');
+      }
+
       this.tareas.unshift(nueva);
       this.persistir();
       this.vista.limpiarFormulario();
       this.vista.ocultarError();
       this.actualizarVista();
-      this.vista.mostrarMensaje('Tarea agregada', 'exito');
+      this.vista.mostrarMensaje('Tarea agregada.', 'exito');
     } catch (error) {
-      const mensaje = error instanceof Error ? error.message : 'Error al crear la tarea.';
+      const mensaje =
+        error instanceof Error ? error.message : 'Error al crear la tarea.';
       this.vista.mostrarError(mensaje);
     }
   }
@@ -118,9 +185,9 @@ export class TareaController {
     this.persistir();
     this.actualizarVista();
     const estado = tarea.completada ? 'completada' : 'pendiente';
-    this.vista.mostrarMensaje(`Tarea marcada como ${estado}`, 'exito');
+    this.vista.mostrarMensaje(`Tarea marcada como ${estado}.`, 'exito');
   }
-  
+
   eliminar(id: string): void {
     const indice = this.tareas.findIndex((t) => t.id === id);
     if (indice === -1) return;
@@ -146,9 +213,6 @@ export class TareaController {
     }, 5000);
   }
 
-  /**
-   * Restaura la última tarea eliminada (si el plazo no expiró).
-   */
   deshacerEliminar(): void {
     if (!this.ultimaEliminada) return;
 
@@ -166,25 +230,35 @@ export class TareaController {
     this.vista.mostrarMensaje('Eliminación deshecha.', 'exito');
   }
 
-  editar(id: string, titulo: string, prioridad: Prioridad): void {
+  editar(
+    id: string,
+    titulo: string,
+    prioridad: Prioridad,
+    categoria: Categoria,
+    fechaLimiteStr: string
+  ): void {
     const tarea = this.tareas.find((t) => t.id === id);
     if (!tarea) return;
     try {
-      tarea.actualizar(titulo, prioridad);
+      const limite = this.parseFechaLimite(fechaLimiteStr);
+      tarea.actualizar({
+        titulo,
+        prioridad,
+        categoria,
+        fechaLimite: limite,
+      });
       this.persistir();
       this.vista.ocultarError();
       this.actualizarVista();
-      this.vista.mostrarMensaje('Tarea actualizada', 'exito');
+      this.vista.mostrarMensaje('Tarea actualizada.', 'exito');
     } catch (error) {
-      const mensaje = error instanceof Error ? error.message : 'Error al editar la tarea.';
+      const mensaje =
+        error instanceof Error ? error.message : 'Error al editar la tarea.';
       this.vista.mostrarError(mensaje);
       this.actualizarVista();
     }
   }
 
-  /**
- * Descarga un archivo JSON con todas las tareas actuales.
- */
   exportar(): void {
     try {
       const datos = this.tareas.map((t) => t.toJSON());
@@ -198,17 +272,17 @@ export class TareaController {
       enlace.download = `tareas-${fecha}.json`;
       enlace.click();
       URL.revokeObjectURL(url);
-      this.vista.mostrarMensaje(`Exportadas ${this.tareas.length} tarea(s).`, 'exito');
+      this.vista.mostrarMensaje(
+        `Exportadas ${this.tareas.length} tarea(s).`,
+        'exito'
+      );
     } catch (error) {
-      const mensaje = error instanceof Error ? error.message : 'Error al exportar.';
-      this.vista.mostrarMensaje(mensaje, 'error');
+      const mensaje =
+        error instanceof Error ? error.message : 'Error al exportar.';
+      this.vista.mostrarError(mensaje);
     }
   }
 
-  /**
-   * Lee un archivo JSON, valida cada tarea y reemplaza el listado actual.
-   * Pide confirmación si ya hay tareas.
-   */
   importar(archivo: File): void {
     if (this.tareas.length > 0) {
       const ok = confirm(
@@ -222,11 +296,11 @@ export class TareaController {
       try {
         const texto = lector.result;
         if (typeof texto !== 'string') {
-          throw new Error('No se pudo leer el archivo');
+          throw new Error('No se pudo leer el archivo.');
         }
         const parsed: unknown = JSON.parse(texto);
         if (!Array.isArray(parsed)) {
-          throw new Error('El archivo debe contener un array de tareas');
+          throw new Error('El archivo debe contener un array de tareas.');
         }
         if (parsed.length === 0) {
           throw new Error('El archivo no contiene tareas.');
@@ -246,14 +320,18 @@ export class TareaController {
         this.persistir();
         this.vista.ocultarError();
         this.actualizarVista();
-        this.vista.mostrarMensaje(`Importadas ${importadas.length} tarea(s).`, 'exito');
+        this.vista.mostrarMensaje(
+          `Importadas ${importadas.length} tarea(s).`,
+          'exito'
+        );
       } catch (error) {
-        const mensaje = error instanceof Error ? error.message : 'Error al importar';
-        this.vista.mostrarMensaje(mensaje, 'error');
+        const mensaje =
+          error instanceof Error ? error.message : 'Error al importar.';
+        this.vista.mostrarError(mensaje);
       }
     };
     lector.onerror = () => {
-      this.vista.mostrarMensaje('No se pudo leer el archivo', 'error');
+      this.vista.mostrarError('No se pudo leer el archivo.');
     };
     lector.readAsText(archivo);
   }
